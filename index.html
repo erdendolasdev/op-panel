@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>op-panel</title>
+    <!-- Gelişmiş Font & İkon Paketleri -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js Grafikler İçin CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Supabase JS Client CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- SIDEBAR (MENÜ) -->
+        <aside class="sidebar" id="appSidebar">
+            <div class="sidebar-logo">
+                <i class="fa-solid fa-square-poll-vertical"></i>
+                <span>op-panel v1.0</span>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li class="active" data-view="dashboard">
+                    <a href="#dashboard"><i class="fa-solid fa-chart-pie"></i><span>Gösterge Paneli</span></a>
+                </li>
+                <li data-view="kanban">
+                    <a href="#kanban"><i class="fa-solid fa-bars-progress"></i><span>Süreç Takip (Kanban)</span></a>
+                </li>
+                <li data-view="tasks">
+                    <a href="#tasks"><i class="fa-solid fa-list-check"></i><span>Operasyon Listesi</span></a>
+                </li>
+                <li data-view="settings">
+                    <a href="#settings"><i class="fa-solid fa-sliders"></i><span>Sistem Ayarları</span></a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar" id="avatarName">AY</div>
+                    <div class="user-info">
+                        <span class="name" id="profileName">Ahmet Yılmaz</span>
+                        <span class="role" id="profileRole">Operasyon Yöneticisi</span>
+                    </div>
+                </div>
+                <button class="logout-btn" id="logoutBtn" title="Çıkış Yap">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> <span>Çıkış Yap</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Mobil Menü Karartma Backdrop -->
+        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+        <!-- ANA İÇERİK ALANI -->
+        <main class="main-content">
+            
+            <!-- Demo Modu Banner -->
+            <div class="demo-banner" id="demoBanner">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span><strong>Demo Modu:</strong> Veriler tarayıcınızda geçici olarak saklanmaktadır. Gerçek bulut tabanlı üyelik ve veritabanı senkronizasyonu için Supabase API bilgilerinizi <code>app.js</code> dosyasına ekleyin.</span>
+            </div>
+            
+            <!-- HEADER (ÜST BAR) -->
+            <header class="header">
+                <div class="header-title">
+                    <button class="menu-btn" id="menuToggle"><i class="fa-solid fa-bars"></i></button>
+                    <h1 id="viewTitle">Gösterge Paneli</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="theme-toggle" id="themeToggle" title="Temayı Değiştir">
+                        <i class="fa-solid fa-sun" id="themeIcon"></i>
+                    </button>
+                    <button class="notification-btn" id="notiBtn" title="Bildirimler">
+                        <i class="fa-solid fa-bell"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- İÇERİK GÖVDESİ -->
+            <div class="content-body">
+                
+                <!-- GÖRÜNÜM 1: DASHBOARD -->
+                <section class="view-section active" id="view-dashboard">
+                    
+                    <!-- Hızlı İstatistik Kartları -->
+                    <div class="stats-grid">
+                        <div class="glass-card stat-card">
+                            <div class="stat-info">
+                                <span class="stat-label">Aktif Süreçler</span>
+                                <div class="stat-value" id="stat-active">0</div>
+                                <div class="stat-trend up"><i class="fa-solid fa-circle-play"></i> Yürütülüyor</div>
+                            </div>
+                            <div class="stat-icon-box" style="background-color: var(--primary-light); color: var(--primary);">
+                                <i class="fa-solid fa-spinner"></i>
+                            </div>
+                        </div>
+
+                        <div class="glass-card stat-card">
+                            <div class="stat-info">
+                                <span class="stat-label">Bekleyen Onaylar</span>
+                                <div class="stat-value" id="stat-pending">0</div>
+                                <div class="stat-trend" style="color: var(--warning);"><i class="fa-solid fa-circle-exclamation"></i> Onay Bekliyor</div>
+                            </div>
+                            <div class="stat-icon-box" style="background-color: var(--warning-light); color: var(--warning);">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                            </div>
+                        </div>
+
+                        <div class="glass-card stat-card">
+                            <div class="stat-info">
+                                <span class="stat-label">Kritik Görevler</span>
+                                <div class="stat-value" id="stat-critical">0</div>
+                                <div class="stat-trend down"><i class="fa-solid fa-triangle-exclamation"></i> Yüksek Öncelikli</div>
+                            </div>
+                            <div class="stat-icon-box" style="background-color: var(--danger-light); color: var(--danger);">
+                                <i class="fa-solid fa-fire"></i>
+                            </div>
+                        </div>
+
+                        <div class="glass-card stat-card">
+                            <div class="stat-info">
+                                <span class="stat-label">Tamamlanan Süreçler</span>
+                                <div class="stat-value" id="stat-completed">0</div>
+                                <div class="stat-trend up"><i class="fa-solid fa-circle-check"></i> Son 30 Gün</div>
+                            </div>
+                            <div class="stat-icon-box" style="background-color: var(--success-light); color: var(--success);">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grafikler Bölümü -->
+                    <div class="charts-grid">
+                        <div class="glass-card">
+                            <div class="chart-header">
+                                <h3>Haftalık Süreç Performansı (Tamamlanan / Yeni Açılan)</h3>
+                                <i class="fa-solid fa-chart-line text-muted"></i>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="performanceChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="glass-card">
+                            <div class="chart-header">
+                                <h3>Süreç Dağılımı (Durum)</h3>
+                                <i class="fa-solid fa-chart-pie text-muted"></i>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="distributionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Son Aktiviteler Listesi -->
+                    <div class="glass-card">
+                        <div class="chart-header">
+                            <h3>Son Operasyonel Hareketler</h3>
+                            <button class="btn btn-secondary btn-icon" id="refreshActivityBtn" title="Yenile"><i class="fa-solid fa-rotate"></i></button>
+                        </div>
+                        <div style="margin-top: 16px;">
+                            <table class="custom-table" id="activityTable">
+                                <thead>
+                                    <tr>
+                                        <th>İşlem Detayı</th>
+                                        <th>Süreç / Görev</th>
+                                        <th>Sorumlu</th>
+                                        <th>Zaman</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="activityLogContainer">
+                                    <!-- Dinamik olarak JS tarafından doldurulacak -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- GÖRÜNÜM 2: KANBAN BOARD -->
+                <section class="view-section" id="view-kanban">
+                    <div class="kanban-controls">
+                        <div>
+                            <p class="text-muted" style="font-size: 14px;">Süreç adımlarını sürükleyip bırakarak veya kart detayından kolayca güncelleyebilirsiniz.</p>
+                        </div>
+                        <button class="btn btn-primary" id="addCardBtn">
+                            <i class="fa-solid fa-plus"></i> Yeni Süreç Kartı Ekle
+                        </button>
+                    </div>
+
+                    <div class="kanban-board">
+                        <!-- Sütun 1: Yeni Talep -->
+                        <div class="kanban-column" data-status="new">
+                            <div class="kanban-column-header">
+                                <span class="column-title"><i class="fa-solid fa-inbox" style="color: var(--info);"></i> Yeni Talepler</span>
+                                <span class="column-badge" id="badge-new">0</span>
+                            </div>
+                            <div class="kanban-cards-container" id="container-new"></div>
+                        </div>
+
+                        <!-- Sütun 2: Planlama -->
+                        <div class="kanban-column" data-status="planning">
+                            <div class="kanban-column-header">
+                                <span class="column-title"><i class="fa-solid fa-map" style="color: var(--warning);"></i> Planlama</span>
+                                <span class="column-badge" id="badge-planning">0</span>
+                            </div>
+                            <div class="kanban-cards-container" id="container-planning"></div>
+                        </div>
+
+                        <!-- Sütun 3: Yürütülüyor -->
+                        <div class="kanban-column" data-status="in-progress">
+                            <div class="kanban-column-header">
+                                <span class="column-title"><i class="fa-solid fa-gears" style="color: var(--primary);"></i> Yürütülüyor</span>
+                                <span class="column-badge" id="badge-in-progress">0</span>
+                            </div>
+                            <div class="kanban-cards-container" id="container-in-progress"></div>
+                        </div>
+
+                        <!-- Sütun 4: Kontrol / Test -->
+                        <div class="kanban-column" data-status="testing">
+                            <div class="kanban-column-header">
+                                <span class="column-title"><i class="fa-solid fa-vial-circle-check" style="color: var(--danger);"></i> Test & Kontrol</span>
+                                <span class="column-badge" id="badge-testing">0</span>
+                            </div>
+                            <div class="kanban-cards-container" id="container-testing"></div>
+                        </div>
+
+                        <!-- Sütun 5: Tamamlandı -->
+                        <div class="kanban-column" data-status="completed">
+                            <div class="kanban-column-header">
+                                <span class="column-title"><i class="fa-solid fa-circle-check" style="color: var(--success);"></i> Tamamlandı</span>
+                                <span class="column-badge" id="badge-completed">0</span>
+                            </div>
+                            <div class="kanban-cards-container" id="container-completed"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- GÖRÜNÜM 3: OPERASYON / GÖREV LİSTESİ -->
+                <section class="view-section" id="view-tasks">
+                    <div class="glass-card">
+                        <!-- Filtreleme ve Arama Barı -->
+                        <div class="table-controls">
+                            <div class="search-box">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="taskSearchInput" placeholder="Süreç adı veya sorumlu ara...">
+                            </div>
+                            
+                            <div class="filter-group">
+                                <select class="filter-select" id="filterDepartment">
+                                    <option value="all">Tüm Departmanlar</option>
+                                    <option value="Ar-Ge">Ar-Ge / Geliştirme</option>
+                                    <option value="Tasarım">Tasarım</option>
+                                    <option value="Operasyon">Operasyon</option>
+                                    <option value="Pazarlama">Pazarlama & Satış</option>
+                                    <option value="IK">İnsan Kaynakları</option>
+                                </select>
+                                
+                                <select class="filter-select" id="filterPriority">
+                                    <option value="all">Tüm Öncelikler</option>
+                                    <option value="low">Düşük</option>
+                                    <option value="medium">Orta</option>
+                                    <option value="high">Yüksek</option>
+                                </select>
+
+                                <select class="filter-select" id="filterStatus">
+                                    <option value="all">Tüm Durumlar</option>
+                                    <option value="new">Yeni Talep</option>
+                                    <option value="planning">Planlama</option>
+                                    <option value="in-progress">Yürütülüyor</option>
+                                    <option value="testing">Test & Kontrol</option>
+                                    <option value="completed">Tamamlandı</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Tablo -->
+                        <div class="table-responsive">
+                            <table class="custom-table" id="taskTable">
+                                <thead>
+                                    <tr>
+                                        <th>Süreç / Görev Adı</th>
+                                        <th>Departman</th>
+                                        <th>Sorumlu Personel</th>
+                                        <th>Öncelik</th>
+                                        <th>Bitiş Tarihi</th>
+                                        <th>Süreç Durumu</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="taskTableBody">
+                                    <!-- JS ile dinamik doldurulacak -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- GÖRÜNÜM 4: SİSTEM AYARLARI -->
+                <section class="view-section" id="view-settings">
+                    <div class="settings-grid">
+                        
+                        <div class="glass-card settings-nav">
+                            <button class="settings-nav-btn active" data-tab="general">
+                                <i class="fa-solid fa-gears"></i> Genel Panel Ayarları
+                            </button>
+                            <button class="settings-nav-btn" data-tab="profile">
+                                <i class="fa-solid fa-user-gear"></i> Kullanıcı Profili
+                            </button>
+                        </div>
+
+                        <div class="glass-card" id="settings-tab-content" style="min-height: 350px;">
+                            <!-- Dinamik içerik buraya yüklenecek (JS tarafından) -->
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- SÜREÇ / GÖREV EKLEME VE DÜZENLEME MODAL -->
+    <div class="modal-overlay" id="taskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Yeni Süreç Kartı Oluştur</h3>
+                <button class="modal-close" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="taskForm">
+                    <input type="hidden" id="taskIdField">
+                    
+                    <div class="form-group">
+                        <label for="taskTitleInput">Süreç / Görev Başlığı *</label>
+                        <input type="text" id="taskTitleInput" class="form-control" placeholder="Örn: E-Ticaret Entegrasyonu Yapılması" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taskDescInput">Açıklama / Detaylar</label>
+                        <textarea id="taskDescInput" class="form-control" placeholder="Yapılacak işlerin detaylarını yazın..."></textarea>
+                    </div>
+
+                    <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div>
+                            <label for="taskDeptInput">Departman *</label>
+                            <select id="taskDeptInput" class="form-control" required>
+                                <option value="Ar-Ge">Ar-Ge / Geliştirme</option>
+                                <option value="Tasarım">Tasarım</option>
+                                <option value="Operasyon">Operasyon</option>
+                                <option value="Pazarlama">Pazarlama & Satış</option>
+                                <option value="IK">İnsan Kaynakları</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="taskPriorityInput">Öncelik Seviyesi *</label>
+                            <select id="taskPriorityInput" class="form-control" required>
+                                <option value="low">Düşük</option>
+                                <option value="medium" selected>Orta</option>
+                                <option value="high">Yüksek</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div>
+                            <label for="taskAssigneeInput">Sorumlu Personel *</label>
+                            <input type="text" id="taskAssigneeInput" class="form-control" placeholder="Örn: Ayşe Yılmaz" required>
+                        </div>
+                        <div>
+                            <label for="taskDueDateInput">Hedef Bitiş Tarihi *</label>
+                            <input type="date" id="taskDueDateInput" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taskStatusInput">Mevcut Aşama *</label>
+                        <select id="taskStatusInput" class="form-control" required>
+                            <option value="new">Yeni Talep</option>
+                            <option value="planning">Planlama</option>
+                            <option value="in-progress">Yürütülüyor</option>
+                            <option value="testing">Test & Kontrol</option>
+                            <option value="completed">Tamamlandı</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelModalBtn">Vazgeç</button>
+                <button type="button" class="btn btn-primary" id="saveTaskBtn">Kartı Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KULLANICI ÜYELİK (AUTH) EKRANI -->
+    <div class="auth-container" id="authContainer">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <i class="fa-solid fa-square-poll-vertical"></i>
+                <span>op-panel SaaS</span>
+            </div>
+            
+            <div class="auth-views">
+                <!-- GİRİŞ FORMU -->
+                <div class="auth-view active" id="loginView">
+                    <h2>Giriş Yap</h2>
+                    <p class="auth-subtitle">Hesabınıza giriş yaparak süreçlerinizi yönetmeye devam edin.</p>
+                    
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="loginEmail">E-Posta Adresi</label>
+                            <input type="email" id="loginEmail" class="form-control" placeholder="örnek@firma.com" required autocomplete="email">
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Şifre</label>
+                            <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+                        </div>
+                        <button type="submit" class="btn btn-primary auth-submit-btn">Giriş Yap</button>
+                    </form>
+                    
+                    <div class="auth-switch">
+                        Hesabınız yok mu? <a href="#" id="toRegisterLink">Yeni Hesap Oluştur</a>
+                    </div>
+                </div>
+
+                <!-- KAYIT FORMU -->
+                <div class="auth-view" id="registerView">
+                    <h2>Yeni Hesap Oluştur</h2>
+                    <p class="auth-subtitle">Süreç panelinizi kullanmak için hemen ücretsiz kaydolun.</p>
+                    
+                    <form id="registerForm">
+                        <div class="form-group">
+                            <label for="registerName">Adınız Soyadınız</label>
+                            <input type="text" id="registerName" class="form-control" placeholder="Ahmet Yılmaz" required autocomplete="name">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerEmail">E-Posta Adresi</label>
+                            <input type="email" id="registerEmail" class="form-control" placeholder="örnek@firma.com" required autocomplete="email">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">Şifre (Min. 6 Karakter)</label>
+                            <input type="password" id="registerPassword" class="form-control" placeholder="••••••••" required autocomplete="new-password" minlength="6">
+                        </div>
+                        <button type="submit" class="btn btn-primary auth-submit-btn">Kayıt Ol</button>
+                    </form>
+                    
+                    <div class="auth-switch">
+                        Zaten üye misiniz? <a href="#" id="toLoginLink">Giriş Yap</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobil Yüzen Süreç Ekleme Butonu (FAB) -->
+    <button class="mobile-fab" id="mobileFab" title="Yeni Süreç Kartı Ekle">
+        <i class="fa-solid fa-plus"></i>
+    </button>
+
+    <!-- JAVASCRIPT KODLARI -->
+    <script src="app.js"></script>
+</body>
+</html>
