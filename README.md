@@ -60,10 +60,6 @@ Ardından `schema.sql` dosyasını Supabase SQL editöründe çalıştırarak ve
 
 | Dosya | Açıklama |
 |---|---|
-
-
-
-
 | `index.html` | Arayüz (Layout ve Modallar) |
 | `style.css` | Tasarım Sistemi (Glassmorphism, Dark/Light Mode, Toasts) |
 | `app.js` | İş Mantığı (State Management, Kanban, Checklist, Auth) |
