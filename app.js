@@ -35,7 +35,8 @@ if (SUPABASE_URL && SUPABASE_ANON_KEY) {
 const state = {
     tasks: [],
     activities: [],
-    currentUser: null, // Giriş yapmış kullanıcı bilgileri
+    currentUser: null,
+    tempChecklist: [], 
     settings: {
         theme: 'dark',
         companyName: 'Örnek İşletme A.Ş.',
@@ -117,6 +118,34 @@ const statusMap = {
     'testing': 'Test & Kontrol',
     'completed': 'Tamamlandı'
 };
+
+// ==========================================================================
+// TOAST BİLDİRİM FONKSİYONU
+// ==========================================================================
+function showToast(message, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    let icon = 'fa-info-circle';
+    if (type === 'success') icon = 'fa-check-circle';
+    if (type === 'error') icon = 'fa-exclamation-circle';
+    if (type === 'warning') icon = 'fa-triangle-exclamation';
+
+    toast.innerHTML = `
+        <i class="fa-solid ${icon}"></i>
+        <span>${message}</span>
+    `;
+    
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
 
 // ==========================================================================
 // BAŞLANGIÇ & AUTH KONTROLÜ
@@ -364,6 +393,16 @@ function setupEventListeners() {
 
     document.getElementById('saveTaskBtn').addEventListener('click', saveTask);
 
+    document.getElementById('addChecklistItemBtn').addEventListener('click', () => {
+        const input = document.getElementById('newChecklistItem');
+        const text = input.value.trim();
+        if (text) {
+            state.tempChecklist.push({ text, completed: false });
+            input.value = '';
+            renderModalChecklist();
+        }
+    });
+
     // Filtreler & Arama
     document.getElementById('taskSearchInput').addEventListener('input', renderTasksTable);
     document.getElementById('filterDepartment').addEventListener('change', renderTasksTable);
@@ -459,9 +498,9 @@ async function handleLogin(e) {
         // Gerçek Supabase Login
         const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) {
-            alert('Giriş başarısız: ' + error.message);
+            showToast('Giriş başarısız: ' + error.message, 'error');
         } else {
-            console.log('Supabase Giriş Başarılı:', data);
+            showToast('Hoş geldiniz!', 'success');
         }
     } else {
         // Demo Girişi
@@ -753,11 +792,30 @@ function renderKanban() {
             card.setAttribute('draggable', 'true');
             card.setAttribute('data-id', task.id);
             
+            const isOverdue = task.status !== 'completed' && new Date(task.dueDate) < new Date().setHours(0,0,0,0);
+            const overdueTag = isOverdue ? '<span class="card-tag overdue">GECİKMİŞ</span>' : '';
+            
+            const totalItems = task.checklist ? task.checklist.length : 0;
+            const completedItems = task.checklist ? task.checklist.filter(c => c.completed).length : 0;
+            const progressPercent = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
+            
             card.innerHTML = `
-                <span class="card-tag ${task.priority}">${task.priority === 'high' ? 'Yüksek' : task.priority === 'medium' ? 'Orta' : 'Düşük'}</span>
+                <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                    <span class="card-tag ${task.priority}">${task.priority === 'high' ? 'Yüksek' : task.priority === 'medium' ? 'Orta' : 'Düşük'}</span>
+                    ${overdueTag}
+                </div>
                 <h4 class="card-title">${escapeHTML(task.title)}</h4>
                 <p class="card-desc">${escapeHTML(task.desc || 'Açıklama belirtilmedi.')}</p>
                 
+                ${totalItems > 0 ? `
+                    <div class="checklist-progress">
+                        <div class="checklist-progress-bar" style="width: ${progressPercent}%"></div>
+                    </div>
+                    <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 8px;">
+                        <i class="fa-solid fa-list-check"></i> ${completedItems}/${totalItems} Alt Görev
+                    </div>
+                ` : ''}
+
                 <div class="card-meta">
                     <div class="card-assignee">
                         <span class="avatar-mini">${task.assignee ? task.assignee.slice(0,2).toUpperCase() : '??'}</span>
@@ -922,6 +980,8 @@ function openTaskModal(taskId = null) {
     
     form.reset();
     document.getElementById('taskIdField').value = '';
+    state.tempChecklist = [];
+    renderModalChecklist();
 
     if (taskId) {
         const task = state.tasks.find(t => t.id == taskId);
@@ -935,6 +995,8 @@ function openTaskModal(taskId = null) {
             document.getElementById('taskAssigneeInput').value = task.assignee;
             document.getElementById('taskDueDateInput').value = task.dueDate;
             document.getElementById('taskStatusInput').value = task.status;
+            state.tempChecklist = task.checklist ? JSON.parse(JSON.stringify(task.checklist)) : [];
+            renderModalChecklist();
         }
     } else {
         modalTitle.textContent = 'Yeni Süreç Kartı Oluştur';
@@ -973,7 +1035,8 @@ async function saveTask() {
         priority,
         assignee,
         dueDate,
-        status
+        status,
+        checklist: state.tempChecklist
     };
 
     if (taskId) {
@@ -1031,6 +1094,36 @@ async function saveTask() {
     if (activeSection.id === 'view-dashboard') renderDashboard();
     else if (activeSection.id === 'view-kanban') renderKanban();
     else if (activeSection.id === 'view-tasks') renderTasksTable();
+
+    showToast(taskId ? 'Kart güncellendi' : 'Yeni kart oluşturuldu', 'success');
+}
+
+function renderModalChecklist() {
+    const container = document.getElementById('checklistContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    state.tempChecklist.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'checklist-item';
+        div.innerHTML = `
+            <input type="checkbox" ${item.completed ? 'checked' : ''}>
+            <span style="flex-grow: 1; font-size: 13px; ${item.completed ? 'text-decoration: line-through; color: var(--text-muted);' : ''}">${escapeHTML(item.text)}</span>
+            <button type="button" class="btn btn-icon btn-danger" style="width: 24px; height: 24px; padding: 0; font-size: 10px;"><i class="fa-solid fa-xmark"></i></button>
+        `;
+        
+        div.querySelector('input').addEventListener('change', (e) => {
+            state.tempChecklist[index].completed = e.target.checked;
+            renderModalChecklist();
+        });
+        
+        div.querySelector('.btn-danger').addEventListener('click', () => {
+            state.tempChecklist.splice(index, 1);
+            renderModalChecklist();
+        });
+        
+        container.appendChild(div);
+    });
 }
 
 async function deleteTask(taskId) {
@@ -1057,6 +1150,8 @@ async function deleteTask(taskId) {
             task.title,
             state.currentUser.name
         );
+
+        showToast('Kart silindi', 'success');
 
         const activeSection = document.querySelector('.view-section.active');
         if (activeSection.id === 'view-dashboard') renderDashboard();
@@ -1146,7 +1241,7 @@ function saveGeneralSettings() {
     const defDept = document.getElementById('setDefaultDept').value;
 
     if (!compName) {
-        alert('İşletme adı boş bırakılamaz.');
+        showToast('İşletme adı boş bırakılamaz.', 'warning');
         return;
     }
 
@@ -1160,7 +1255,7 @@ function saveGeneralSettings() {
         state.currentUser.name
     );
 
-    alert('Sistem ayarları başarıyla kaydedildi.');
+    showToast('Ayarlar başarıyla kaydedildi.', 'success');
 }
 
 async function saveProfileSettings() {

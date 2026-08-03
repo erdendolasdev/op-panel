@@ -46,6 +46,7 @@
     --glass-blur: blur(12px);
     --bg-modal: rgba(15, 23, 42, 0.85);
     --input-bg: rgba(15, 23, 42, 0.6);
+    --toast-bg: #1e293b;
 }
 
 /* Açık Tema Tanımlaması */
@@ -62,6 +63,7 @@
     --glass-blur: blur(10px);
     --bg-modal: rgba(255, 255, 255, 0.8);
     --input-bg: #ffffff;
+    --toast-bg: #ffffff;
 }
 
 /* Temel Sıfırlamalar */
@@ -530,6 +532,7 @@ header.header {
 .card-tag.low { background-color: var(--success-light); color: var(--success); }
 .card-tag.medium { background-color: var(--warning-light); color: var(--warning); }
 .card-tag.high { background-color: var(--danger-light); color: var(--danger); }
+.card-tag.overdue { background-color: #7f1d1d; color: #fca5a5; border: 1px solid #ef4444; }
 
 .card-title {
     font-size: 14px;
@@ -1256,5 +1259,74 @@ textarea.form-control {
 .auth-switch a:hover {
     color: var(--primary-hover);
     text-decoration: underline;
+}
+
+/* Toast Bildirimleri */
+.toast-container {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.toast {
+    background: var(--toast-bg);
+    color: var(--text-main);
+    padding: 12px 20px;
+    border-radius: var(--border-radius-md);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 280px;
+    animation: slideInRight 0.3s ease-out;
+    transition: var(--transition);
+}
+
+.toast.success { border-left-color: var(--success); }
+.toast.error { border-left-color: var(--danger); }
+.toast.warning { border-left-color: var(--warning); }
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.toast.fade-out {
+    transform: translateX(100%);
+    opacity: 0;
+}
+
+/* Checklist / Alt Görev Stilleri */
+.checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.checklist-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.checklist-progress {
+    height: 6px;
+    background: var(--border-color);
+    border-radius: 3px;
+    margin: 8px 0;
+    overflow: hidden;
+}
+
+.checklist-progress-bar {
+    height: 100%;
+    background: var(--success);
+    width: 0%;
+    transition: width 0.4s ease;
 }
 

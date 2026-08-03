@@ -384,6 +384,17 @@
                             <option value="completed">Tamamlandı</option>
                         </select>
                     </div>
+
+                    <div class="form-group">
+                        <label>Alt Görevler (Checklist)</label>
+                        <div id="checklistContainer">
+                            <!-- JS ile doldurulacak -->
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-top: 8px;">
+                            <input type="text" id="newChecklistItem" class="form-control" placeholder="Yeni görev ekle...">
+                            <button type="button" class="btn btn-secondary" id="addChecklistItemBtn"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -457,6 +468,9 @@
     <button class="mobile-fab" id="mobileFab" title="Yeni Süreç Kartı Ekle">
         <i class="fa-solid fa-plus"></i>
     </button>
+
+    <!-- Toast Bildirim Konteynırı -->
+    <div id="toastContainer" class="toast-container"></div>
 
     <!-- JAVASCRIPT KODLARI -->
     <script src="app.js"></script>
