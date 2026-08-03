@@ -22,6 +22,9 @@ Herhangi bir kurulum gerektirmez. Tarayıcıda açılır, çalışır.
 - Hesap açıp giriş yaparak verilerinizi bulutta saklayabilirsiniz
 - Koyu ve açık tema arasında geçiş yapabilirsiniz
 - Mobil cihazlardan tam uyumlu olarak kullanabilirsiniz
+- Her kart için **Alt Görevler (Checklist)** oluşturabilir ve ilerlemeyi takip edebilirsiniz
+- Bitiş tarihi geçen görevler için **Gecikme Uyarıları** alırsınız
+- Modern **Toast Bildirimleri** ile tüm işlemleri anlık takip edebilirsiniz
 
 ---
 
@@ -57,10 +60,22 @@ Ardından `schema.sql` dosyasını Supabase SQL editöründe çalıştırarak ve
 
 | Dosya | Açıklama |
 |---|---|
-| `index.html` | Arayüz |
-| `style.css` | Tasarım ve mobil uyumluluk |
-| `app.js` | İş mantığı ve Supabase entegrasyonu |
-| `schema.sql` | Veritabanı şeması (Supabase için) |
+
+
+
+
+| `index.html` | Arayüz (Layout ve Modallar) |
+| `style.css` | Tasarım Sistemi (Glassmorphism, Dark/Light Mode, Toasts) |
+| `app.js` | İş Mantığı (State Management, Kanban, Checklist, Auth) |
+| `schema.sql` | Veritabanı şeması ve Güvenlik Politikaları (RLS) |
+
+---
+
+## Geliştirici Notları
+
+- **Veri Güvenliği:** Supabase modunda Satır Bazlı Güvenlik (RLS) kullanılmıştır. Kullanıcılar sadece kendi verilerine erişebilir.
+- **Performans:** Grafik ve tablolar asenkron yüklenir, DOM manipülasyonu minimize edilmiştir.
+- **Genişletilebilirlik:** Kod yapısı modüler özellikler eklenmesine (Yorumlar, Dosya Yükleme vb.) uygundur.
 
 ---
 

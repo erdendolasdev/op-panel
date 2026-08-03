@@ -534,6 +534,7 @@ header.header {
 .card-tag.high { background-color: var(--danger-light); color: var(--danger); }
 .card-tag.overdue { background-color: #7f1d1d; color: #fca5a5; border: 1px solid #ef4444; }
 
+
 .card-title {
     font-size: 14px;
     font-weight: 600;
