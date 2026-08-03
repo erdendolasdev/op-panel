@@ -39,8 +39,8 @@ const state = {
     tempChecklist: [],
     settings: {
         theme: 'dark',
-        companyName: 'Örnek İşletme A.Ş.',
-        defaultDept: 'Ar-Ge',
+        companyName: 'Ömür Oto Servis & Atölye',
+        defaultDept: 'Planlama / Hazırlık',
         profile: {
             name: 'Ahmet Yılmaz',
             role: 'Operasyon Yöneticisi',
@@ -53,39 +53,39 @@ const state = {
 const initialTasks = [
     {
         id: 't-1',
-        title: 'Mobil Uygulama Arayüz Tasarımı',
-        desc: 'iOS ve Android için yeni arayüz tasarımlarının hazırlanması ve Figma üzerinden onaylatılması.',
-        dept: 'Tasarım',
+        title: 'Opel Corsa - Periyodik Bakım & Balata Değişimi',
+        desc: 'Müşteri şikayeti: Frenlerden ses geliyor. Genel 10.000 km bakımı yapılacak ve ön-arka balatalar kontrol edilip değiştirilecek.',
+        dept: 'Üretim / Atölye',
         priority: 'high',
-        assignee: 'Ece Demir',
+        assignee: 'Usta Selim',
         dueDate: '2026-08-01',
         status: 'completed'
     },
     {
         id: 't-2',
-        title: 'Banka Ödeme Entegrasyon Testleri',
-        desc: 'Sanal POS API entegrasyonunun tamamlanıp test ortamında 3D secure ödeme denemelerinin yapılması.',
-        dept: 'Ar-Ge',
+        title: 'Ahşap Yemek Masası - CNC Kesim & Zımpara',
+        desc: 'Müşteri siparişi üzerine 6 kişilik meşe ağacı masanın CNC kesimi tamamlanacak, pürüzsüzleştirme için zımpara aşamasına geçilecek.',
+        dept: 'Planlama / Hazırlık',
         priority: 'high',
-        assignee: 'Caner Yılmaz',
+        assignee: 'Usta Recep',
         dueDate: '2026-08-05',
         status: 'testing'
     },
     {
         id: 't-3',
-        title: 'Sosyal Medya Lansman Kampanyası',
-        desc: 'Yeni ürün lansmanı için haftalık içerik takviminin hazırlanması ve reklam bütçesinin optimize edilmesi.',
-        dept: 'Pazarlama',
+        title: 'Lazer Epilasyon Seansı - Seans 4/8 Kontrol',
+        desc: 'Danışanın 4. seans uygulaması yapılacak, cilt hassasiyet kontrolü ve dozaj ayarı sistemden güncellenecek.',
+        dept: 'Müşteri / Kabul',
         priority: 'medium',
-        assignee: 'Merve Çelik',
+        assignee: 'Uzman Ece Demir',
         dueDate: '2026-08-10',
         status: 'in-progress'
     },
     {
         id: 't-4',
-        title: 'Yeni Depo Barkod Sistemi Entegrasyonu',
-        desc: 'Depo stok hareketlerinin anlık takibi için el terminallerinin sisteme tanımlanması.',
-        dept: 'Operasyon',
+        title: 'Toptan Deri Ceket Siparişi - Paketleme & Kargo',
+        desc: 'E-Ticaret mağazasından gelen 50 adetlik toptan kışlık deri ceket siparişinin kalite kontrolü yapılıp paketlenecek ve MNG kargoya teslim edilecek.',
+        dept: 'Sevkiyat / Teslimat',
         priority: 'medium',
         assignee: 'Hakan Kaya',
         dueDate: '2026-08-15',
@@ -93,11 +93,11 @@ const initialTasks = [
     },
     {
         id: 't-5',
-        title: 'İK İşe Alım Portalı Gereksinim Analizi',
-        desc: 'Yeni aday takip sisteminin (ATS) kurulması öncesinde departman ihtiyaçlarının raporlanması.',
-        dept: 'IK',
+        title: 'Yeni Atölye Demirbaş Alımı & Fiyat Analizi',
+        desc: 'Kaynak makinesi ve yeni el aletleri takımı için 3 farklı tedarikçiden teklif alınacak, karşılaştırma tablosu hazırlanacak.',
+        dept: 'Planlama / Hazırlık',
         priority: 'low',
-        assignee: 'Zeynep Şahin',
+        assignee: 'Ahmet Yılmaz',
         dueDate: '2026-08-20',
         status: 'new'
     }
@@ -716,7 +716,7 @@ function renderCharts() {
         }
     });
 
-    const depts = ['Ar-Ge', 'Tasarım', 'Operasyon', 'Pazarlama', 'IK'];
+    const depts = ['Müşteri / Kabul', 'Planlama / Hazırlık', 'Üretim / Atölye', 'Kalite Kontrol', 'Sevkiyat / Teslimat'];
     const deptCompleted = depts.map(d => state.tasks.filter(t => t.dept === d && t.status === 'completed').length);
     const deptAll = depts.map(d => state.tasks.filter(t => t.dept === d).length);
 
@@ -1178,11 +1178,11 @@ function renderSettings() {
             <div class="form-group">
                 <label for="setDefaultDept">Varsayılan Departman</label>
                 <select id="setDefaultDept" class="form-control">
-                    <option value="Ar-Ge" ${state.settings.defaultDept === 'Ar-Ge' ? 'selected' : ''}>Ar-Ge / Geliştirme</option>
-                    <option value="Tasarım" ${state.settings.defaultDept === 'Tasarım' ? 'selected' : ''}>Tasarım</option>
-                    <option value="Operasyon" ${state.settings.defaultDept === 'Operasyon' ? 'selected' : ''}>Operasyon</option>
-                    <option value="Pazarlama" ${state.settings.defaultDept === 'Pazarlama' ? 'selected' : ''}>Pazarlama & Satış</option>
-                    <option value="IK" ${state.settings.defaultDept === 'IK' ? 'selected' : ''}>İnsan Kaynakları</option>
+                    <option value="Müşteri / Kabul" ${state.settings.defaultDept === 'Müşteri / Kabul' ? 'selected' : ''}>Müşteri / Kabul</option>
+                    <option value="Planlama / Hazırlık" ${state.settings.defaultDept === 'Planlama / Hazırlık' ? 'selected' : ''}>Planlama / Hazırlık</option>
+                    <option value="Üretim / Atölye" ${state.settings.defaultDept === 'Üretim / Atölye' ? 'selected' : ''}>Üretim / Atölye</option>
+                    <option value="Kalite Kontrol" ${state.settings.defaultDept === 'Kalite Kontrol' ? 'selected' : ''}>Kalite Kontrol</option>
+                    <option value="Sevkiyat / Teslimat" ${state.settings.defaultDept === 'Sevkiyat / Teslimat' ? 'selected' : ''}>Sevkiyat / Teslimat</option>
                 </select>
             </div>
             
