@@ -9,7 +9,7 @@
 // ==========================================================================
 // NOT: Bu değerler boş bırakıldığında uygulama tarayıcının yerel hafızasıyla (Demo Modu) çalışır.
 // Projenizi GitHub'a yüklediğinizde herkesin anında test edebilmesi için Demo Modu varsayılan olarak etkindir.
-const SUPABASE_URL = ''; 
+const SUPABASE_URL = '';
 const SUPABASE_ANON_KEY = '';
 
 let supabaseClient = null;
@@ -36,7 +36,7 @@ const state = {
     tasks: [],
     activities: [],
     currentUser: null,
-    tempChecklist: [], 
+    tempChecklist: [],
     settings: {
         theme: 'dark',
         companyName: 'Örnek İşletme A.Ş.',
@@ -125,10 +125,10 @@ const statusMap = {
 function showToast(message, type = 'info') {
     const container = document.getElementById('toastContainer');
     if (!container) return;
-    
+
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    
+
     let icon = 'fa-info-circle';
     if (type === 'success') icon = 'fa-check-circle';
     if (type === 'error') icon = 'fa-exclamation-circle';
@@ -138,7 +138,7 @@ function showToast(message, type = 'info') {
         <i class="fa-solid ${icon}"></i>
         <span>${message}</span>
     `;
-    
+
     container.appendChild(toast);
 
     setTimeout(() => {
@@ -213,7 +213,7 @@ function showAuthView() {
 
 function showAppView() {
     document.getElementById('authContainer').classList.remove('active');
-    
+
     if (isDemoMode) {
         document.getElementById('demoBanner').style.display = 'flex';
     } else {
@@ -312,7 +312,7 @@ async function loadDataAndRender() {
 function updateProfileUI() {
     document.getElementById('profileName').textContent = state.settings.profile.name;
     document.getElementById('profileRole').textContent = state.settings.profile.role;
-    
+
     const initials = state.settings.profile.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
     document.getElementById('avatarName').textContent = initials;
 }
@@ -350,7 +350,7 @@ function setupEventListeners() {
             e.preventDefault();
             menuItems.forEach(mi => mi.classList.remove('active'));
             item.classList.add('active');
-            
+
             const view = item.getAttribute('data-view');
             window.location.hash = view;
             switchView(view);
@@ -385,7 +385,7 @@ function setupEventListeners() {
     document.getElementById('addCardBtn').addEventListener('click', () => openTaskModal());
     document.getElementById('closeModalBtn').addEventListener('click', closeModal);
     document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
-    
+
     const taskModal = document.getElementById('taskModal');
     taskModal.addEventListener('click', (e) => {
         if (e.target === taskModal) closeModal();
@@ -446,7 +446,7 @@ function switchView(viewName) {
     }
 
     document.querySelectorAll('.view-section').forEach(section => section.classList.remove('active'));
-    
+
     const targetSection = document.getElementById(`view-${viewName}`);
     if (targetSection) targetSection.classList.add('active');
 
@@ -471,7 +471,7 @@ function toggleTheme() {
     localStorage.setItem('sp_theme', newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
     updateThemeIcon();
-    
+
     if (document.getElementById('view-dashboard').classList.contains('active')) {
         renderCharts();
     }
@@ -506,7 +506,7 @@ async function handleLogin(e) {
         // Demo Girişi
         const users = JSON.parse(localStorage.getItem('sp_demo_users') || '[]');
         const user = users.find(u => u.email === email && u.password === password);
-        
+
         if (user) {
             state.currentUser = { id: user.id, email: user.email, name: user.name, role: user.role };
             localStorage.setItem('sp_demo_session', JSON.stringify(state.currentUser));
@@ -522,7 +522,7 @@ async function handleLogin(e) {
             };
             users.push(demoUser);
             localStorage.setItem('sp_demo_users', JSON.stringify(users));
-            
+
             state.currentUser = demoUser;
             localStorage.setItem('sp_demo_session', JSON.stringify(state.currentUser));
             showAppView();
@@ -574,7 +574,7 @@ async function handleRegister(e) {
 
         users.push(newUser);
         localStorage.setItem('sp_demo_users', JSON.stringify(users));
-        
+
         alert('Demo hesabı başarıyla oluşturuldu! Şimdi giriş yapabilirsiniz.');
         document.getElementById('registerView').classList.remove('active');
         document.getElementById('loginView').classList.add('active');
@@ -629,7 +629,7 @@ async function addActivity(text, taskTitle, user) {
 // ==========================================================================
 function renderDashboard() {
     const tasks = state.tasks;
-    
+
     const activeTasks = tasks.filter(t => t.status === 'in-progress' || t.status === 'testing').length;
     const pendingTasks = tasks.filter(t => t.status === 'planning' || t.status === 'new').length;
     const criticalTasks = tasks.filter(t => t.priority === 'high' && t.status !== 'completed').length;
@@ -669,7 +669,7 @@ function renderDashboard() {
 function formatActivityTime(time) {
     if (!time) return 'Bilinmiyor';
     if (time === 'Şimdi' || time.includes('önce')) return time;
-    
+
     // Supabase ISO string ise
     const date = new Date(time);
     if (!isNaN(date)) {
@@ -698,9 +698,9 @@ function renderCharts() {
             labels: ['Yeni Talep', 'Planlama', 'Yürütülüyor', 'Test & Kontrol', 'Tamamlandı'],
             datasets: [{
                 data: [counts.new, counts.planning, counts['in-progress'], counts.testing, counts.completed],
-                backgroundColor: ['#06b6d4', '#f59e0b', '#4f46e5', '#ef4444', '#10b981'],
+                backgroundColor: ['#0284c7', '#d97706', '#4f46e5', '#ef4444', '#10b981'],
                 borderWidth: isDark ? 2 : 1,
-                borderColor: isDark ? '#0f172a' : '#ffffff'
+                borderColor: isDark ? '#111827' : '#ffffff'
             }]
         },
         options: {
@@ -773,12 +773,12 @@ function renderCharts() {
 // ==========================================================================
 function renderKanban() {
     const statuses = ['new', 'planning', 'in-progress', 'testing', 'completed'];
-    
+
     statuses.forEach(status => {
         const container = document.getElementById(`container-${status}`);
         const badge = document.getElementById(`badge-${status}`);
         container.innerHTML = '';
-        
+
         const filteredTasks = state.tasks.filter(t => t.status === status);
         badge.textContent = filteredTasks.length;
 
@@ -791,14 +791,14 @@ function renderKanban() {
             card.className = 'kanban-card';
             card.setAttribute('draggable', 'true');
             card.setAttribute('data-id', task.id);
-            
-            const isOverdue = task.status !== 'completed' && new Date(task.dueDate) < new Date().setHours(0,0,0,0);
+
+            const isOverdue = task.status !== 'completed' && new Date(task.dueDate) < new Date().setHours(0, 0, 0, 0);
             const overdueTag = isOverdue ? '<span class="card-tag overdue">GECİKMİŞ</span>' : '';
-            
+
             const totalItems = task.checklist ? task.checklist.length : 0;
             const completedItems = task.checklist ? task.checklist.filter(c => c.completed).length : 0;
             const progressPercent = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
-            
+
             card.innerHTML = `
                 <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                     <span class="card-tag ${task.priority}">${task.priority === 'high' ? 'Yüksek' : task.priority === 'medium' ? 'Orta' : 'Düşük'}</span>
@@ -818,7 +818,7 @@ function renderKanban() {
 
                 <div class="card-meta">
                     <div class="card-assignee">
-                        <span class="avatar-mini">${task.assignee ? task.assignee.slice(0,2).toUpperCase() : '??'}</span>
+                        <span class="avatar-mini">${task.assignee ? task.assignee.slice(0, 2).toUpperCase() : '??'}</span>
                         <span>${escapeHTML(task.assignee)}</span>
                     </div>
                     <div class="card-actions">
@@ -856,7 +856,7 @@ function setupDragAndDrop() {
 
     containers.forEach(container => {
         const column = container.closest('.kanban-column');
-        
+
         container.addEventListener('dragover', (e) => {
             e.preventDefault();
             const draggingCard = document.querySelector('.dragging');
@@ -890,7 +890,7 @@ async function updateTaskStatus(taskId, newStatus) {
         } else {
             localStorage.setItem(`sp_tasks_${state.currentUser.email}`, JSON.stringify(state.tasks));
         }
-        
+
         await addActivity(
             `${state.currentUser.name}, "${task.title}" sürecini "${statusMap[newStatus]}" aşamasına taşıdı.`,
             task.title,
@@ -914,8 +914,8 @@ function renderTasksTable() {
     tbody.innerHTML = '';
 
     const filtered = state.tasks.filter(task => {
-        const matchesSearch = task.title.toLowerCase().includes(searchVal) || 
-                              task.assignee.toLowerCase().includes(searchVal);
+        const matchesSearch = task.title.toLowerCase().includes(searchVal) ||
+            task.assignee.toLowerCase().includes(searchVal);
         const matchesDept = filterDept === 'all' || task.dept === filterDept;
         const matchesPri = filterPri === 'all' || task.priority === filterPri;
         const matchesStat = filterStat === 'all' || task.status === filterStat;
@@ -930,7 +930,7 @@ function renderTasksTable() {
 
     filtered.forEach(task => {
         const row = document.createElement('tr');
-        
+
         let priClass = 'secondary';
         let priText = 'Düşük';
         if (task.priority === 'high') { priClass = 'danger'; priText = 'Yüksek'; }
@@ -948,7 +948,7 @@ function renderTasksTable() {
             <td><span class="badge secondary">${escapeHTML(task.dept)}</span></td>
             <td>
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <span class="avatar-mini" style="background-color: var(--primary-hover);">${task.assignee ? task.assignee.slice(0,2).toUpperCase() : '??'}</span>
+                    <span class="avatar-mini" style="background-color: var(--primary-hover);">${task.assignee ? task.assignee.slice(0, 2).toUpperCase() : '??'}</span>
                     <span>${escapeHTML(task.assignee)}</span>
                 </div>
             </td>
@@ -977,7 +977,7 @@ function openTaskModal(taskId = null) {
     const modal = document.getElementById('taskModal');
     const form = document.getElementById('taskForm');
     const modalTitle = document.getElementById('modalTitle');
-    
+
     form.reset();
     document.getElementById('taskIdField').value = '';
     state.tempChecklist = [];
@@ -1044,7 +1044,7 @@ async function saveTask() {
         const taskIndex = state.tasks.findIndex(t => t.id == taskId);
         if (taskIndex > -1) {
             const oldStatus = state.tasks[taskIndex].status;
-            
+
             if (!isDemoMode) {
                 try {
                     await supabaseClient.from('tasks').update(taskPayload).eq('id', taskId);
@@ -1052,7 +1052,7 @@ async function saveTask() {
                     console.error('Bulut güncelleme hatası:', e);
                 }
             }
-            
+
             state.tasks[taskIndex] = { id: taskId, ...taskPayload };
 
             let logMsg = `${state.currentUser.name}, "${title}" kartını güncelledi.`;
@@ -1089,7 +1089,7 @@ async function saveTask() {
     }
 
     closeModal();
-    
+
     const activeSection = document.querySelector('.view-section.active');
     if (activeSection.id === 'view-dashboard') renderDashboard();
     else if (activeSection.id === 'view-kanban') renderKanban();
@@ -1102,7 +1102,7 @@ function renderModalChecklist() {
     const container = document.getElementById('checklistContainer');
     if (!container) return;
     container.innerHTML = '';
-    
+
     state.tempChecklist.forEach((item, index) => {
         const div = document.createElement('div');
         div.className = 'checklist-item';
@@ -1111,17 +1111,17 @@ function renderModalChecklist() {
             <span style="flex-grow: 1; font-size: 13px; ${item.completed ? 'text-decoration: line-through; color: var(--text-muted);' : ''}">${escapeHTML(item.text)}</span>
             <button type="button" class="btn btn-icon btn-danger" style="width: 24px; height: 24px; padding: 0; font-size: 10px;"><i class="fa-solid fa-xmark"></i></button>
         `;
-        
+
         div.querySelector('input').addEventListener('change', (e) => {
             state.tempChecklist[index].completed = e.target.checked;
             renderModalChecklist();
         });
-        
+
         div.querySelector('.btn-danger').addEventListener('click', () => {
             state.tempChecklist.splice(index, 1);
             renderModalChecklist();
         });
-        
+
         container.appendChild(div);
     });
 }
@@ -1140,7 +1140,7 @@ async function deleteTask(taskId) {
         }
 
         state.tasks = state.tasks.filter(t => t.id != taskId);
-        
+
         if (isDemoMode) {
             localStorage.setItem(`sp_tasks_${state.currentUser.email}`, JSON.stringify(state.tasks));
         }
@@ -1226,7 +1226,7 @@ function renderSettings() {
     settingsTabBtns.forEach(btn => {
         const newBtn = btn.cloneNode(true);
         btn.parentNode.replaceChild(newBtn, btn);
-        
+
         newBtn.addEventListener('click', () => {
             settingsTabBtns.forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.settings-nav-btn').forEach(b => b.classList.remove('active'));
@@ -1280,7 +1280,7 @@ async function saveProfileSettings() {
     } else {
         // Demo oturumunu güncelle
         localStorage.setItem('sp_demo_session', JSON.stringify(state.currentUser));
-        
+
         // Demo kullanıcı listesini güncelle
         const users = JSON.parse(localStorage.getItem('sp_demo_users') || '[]');
         const userIdx = users.findIndex(u => u.email === state.currentUser.email);
@@ -1321,7 +1321,7 @@ function resetMockData() {
 // ==========================================================================
 function escapeHTML(str) {
     if (!str) return '';
-    return str.replace(/[&<>'"]/g, 
+    return str.replace(/[&<>'"]/g,
         tag => ({
             '&': '&amp;',
             '<': '&lt;',
@@ -1336,10 +1336,10 @@ function formatDate(dateStr) {
     if (!dateStr) return '';
     const date = new Date(dateStr);
     if (isNaN(date)) return dateStr;
-    
+
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
-    
+
     return `${day}.${month}.${year}`;
 }
